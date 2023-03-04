@@ -39,8 +39,9 @@ module Vec3 = struct
 
   let ( + ) (x1, y1, z1) (x2, y2, z2) = (x1 +. x2, y1 +. y2, z1 +. z2)
   let ( - ) (x1, y1, z1) (x2, y2, z2) = (x1 -. x2, y1 -. y2, z1 -. z2)
-  let ( *. ) (x1, y1, z1) (x2, y2, z2) = (x1 *. x2, y1 *. y2, z1 *. z2)
+  let pairwise_mult (x1, y1, z1) (x2, y2, z2) = (x1 *. x2, y1 *. y2, z1 *. z2)
 
+  let dot (x1, y1, z1) (x2, y2, z2) : float = (x1 *. x2) +. (y1 *. y2) +. (z1 *. z2)
   (* let ( ** ) (x1, y1, z1) (x2, y2, z2) = (x1 - x2, y1 - y2, z1 - z2) *)
 end
 
@@ -67,27 +68,31 @@ let to_ppm (image : ImageData.t) =
     :: Printf.sprintf "%d %d" image.width image.height
     :: "255" :: image_data
   in
-  String.concat ~sep:"\n" lines
+  String.concat ~sep:"\n" lines ^ "\n"
 
 let write_image image filename =
   let out = Caml.open_out filename in
   Caml.Out_channel.output_string out (to_ppm image);
   ignore (Caml.close_out out)
 
-(* module Scene = struct
-     type t = {
-       width: int;
-       height; int;
-     }
 
-     let create w h =
-   end *)
+let hit_sphere (center: point) (radius: float) (r : Ray.t) : bool =
+  let oc = Vec3.(r.start - center) in
+  let a = Vec3.dot r.direction r.direction in
+  let b = 2.0 *. Vec3.dot oc r.direction in
+  let c = (Vec3.dot oc oc) -. (radius *. radius) in 
+  let discriminant = (b *. b) -. (4. *. a *. c) in
+  Float.(discriminant > 0.)
 
-let choose_color ({ direction; _ } : Ray.t) =
-  let ux, uy, uz = Vec3.unit direction in
+let choose_color (ray : Ray.t) =
+  if hit_sphere (0., 0., -1.) 0.5 ray 
+  then (1.0, 0., 0.)
+  else
+  let ux, uy, uz = Vec3.unit ray.direction in
   let t = (uy *. 0.5) +. 1. in
   Vec3.(
     scale (Vec3.create 1. 1. 1.) (1. -. t) + scale (Vec3.create 0.5 0.7 1.0) t)
+
 
 let () =
   let aspect_ratio = 16. /. 9. in
@@ -96,7 +101,7 @@ let () =
   let viewport_height = 2. in
   let viewport_width = aspect_ratio *. viewport_height in
   let focal_length = 1. in
-  let origin = Vec3.create 0. 0. 0. in
+  let origin = Vec3.create 0. 1. 0. in
   let horizontal = Vec3.create viewport_width 0. 0. in
   let vertical = Vec3.create 0. viewport_height 0. in
   let lower_left_corner =
@@ -104,21 +109,37 @@ let () =
       origin - scale horizontal 0.5 - scale vertical 0.5
       - create 0. 0. focal_length)
   in
-  let some_func x y' =
-    let y = height - y' in
-    let open Float in
-    let u = of_int x /. (of_int width -. 1.) in
-    let v = of_int y /. (of_int height -. 1.) in
-    let r : Ray.t =
-      {
-        start = origin;
-        direction =
-          Vec3.(
-            lower_left_corner + scale horizontal u + scale vertical v - origin);
-      }
-    in
-    let cx, cy, cz = choose_color r in
-    Int.(of_float (255. *. cx), of_float (255. *. cy), of_float (255. *. cz))
-  in
-  let image = ImageData.init width height ~f:some_func in
+  let image = ImageData.create width height in
+  for j = (height - 1) to 0 do
+      for i = 0 to (width - 1) do
+        let open Float in
+        let u = of_int i /. (of_int width -. 1.) in
+        let v = of_int j /. (of_int height -. 1.) in
+      let r : Ray.t =
+        {
+          start = origin;
+          direction =
+            Vec3.(
+              lower_left_corner + scale horizontal u + scale vertical v - origin);
+        } in
+      let (cx, cy, cz) = choose_color r in
+      ImageData.set_exn image i j ( Int.(of_float (255. *. cx), of_float (255. *. cy), of_float (255. *. cz)))
+      done
+ done;
+  (* let init_f x y = *)
+  (*   let open Float in *)
+  (*   let u = of_int x /. (of_int width -. 1.) in *)
+  (*   let v = of_int y /. (of_int height -. 1.) in *)
+  (*   let r : Ray.t = *)
+  (*     { *)
+  (*       start = origin; *)
+  (*       direction = *)
+  (*         Vec3.( *)
+  (*           lower_left_corner + scale horizontal u + scale vertical v - origin); *)
+  (*     } *)
+  (*   in *)
+  (*   let cx, cy, cz = choose_color r in *)
+  (*   Int.(of_float (255. *. cx), of_float (255. *. cy), of_float (255. *. cz)) *)
+  (* in *)
+  (* let image = ImageData.init width height ~f:init_f in *)
   write_image image "test.ppm"
