@@ -1,29 +1,8 @@
 open! Core
 open Raygun_lib
-
-type point = Vec3.t
+open BaseTypes
 
 let print_vec vec = Stdio.print_endline @@ Vec3.to_s vec
-
-module Ray = struct
-  (*
-     We think of rays as start + t * direction, where t is time
-  *)
-  type t = { start : point; direction : Vec3.t }
-
-  let create start direction = { start; direction }
-  let at { start; direction } t = Vec3.(start + scale direction t)
-end
-
-(* returns -1 if not, otherwise *)
-let hit_sphere (center : point) (radius : float) (r : Ray.t) : float =
-  let oc = Vec3.(r.start - center) in
-  let a = Vec3.dot r.direction r.direction in
-  let b = 2.0 *. Vec3.dot oc r.direction in
-  let c = Vec3.dot oc oc -. (radius *. radius) in
-  let discriminant = (b *. b) -. (4. *. a *. c) in
-  if Float.(discriminant < 0.) then -1.
-  else (-.b -. Float.sqrt discriminant) /. (2. *. a)
 
 (* 
  * Create a vertical linear gradient background color
@@ -37,12 +16,12 @@ let bg_color (ray : Ray.t) =
     scale (Vec3.create 1. 1. 1.) (1. -. t) + scale (Vec3.create 0.5 0.7 1.0) t)
 
 let choose_color (ray : Ray.t) =
-  let hit_sphere_as_float = hit_sphere (0., 0., -1.) 0.5 ray in
-
-  if Float.(hit_sphere_as_float < 0.) then bg_color ray
-  else
-    let n = Vec3.(unit (Ray.at ray hit_sphere_as_float) - create 0. 0. (-1.)) in
-    Vec3.scale (Vec3.add_scal n 1.) 0.5
+  let sphere = Sphere.create (0., 0., -1.) 0.5 in
+  match Sphere.hit sphere ray with
+  | Miss -> bg_color ray
+  | Hit { t; _ } ->
+      let n = Vec3.(unit (Ray.at ray t) - create 0. 0. (-1.)) in
+      Vec3.scale (Vec3.add_scal n 1.) 0.5
 
 let write_image image filename =
   let out = Caml.open_out filename in

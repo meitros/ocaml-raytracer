@@ -7,6 +7,7 @@ let create x y z : t = (x, y, z)
 
 (* computes the length of a vector *)
 let length (x, y, z) = Float.(sqrt (square x + square y + square z))
+let length_squared vec = Float.square @@ length vec
 
 (* adds two vectors *)
 let add (x1, y1, z1) (x2, y2, z2) = (x1 +. x2, y1 +. y2, z1 +. z2)

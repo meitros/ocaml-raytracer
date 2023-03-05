@@ -4,7 +4,7 @@
  (preprocess
   (pps ppx_jane)))
 
-(ignored_subdirs (temp))
+(data_only_dirs temp)
 
 (env
  (dev
