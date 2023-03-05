@@ -78,19 +78,3 @@ let () =
   in
   let image = ImageData.init image_width image_height ~f:render_pixel in
   write_image image "test.ppm"
-
-(* Caml.print_endline (Printf.sprintf "%d: %F" x u); *)
-
-(* print_vec
-     Vec3.(
-       lower_left_corner + scale horizontal 0.5 + scale vertical 0.5 - origin);
-   let rr : Ray.t =
-     {
-       start = origin;
-       direction =
-         Vec3.(
-           lower_left_corner + scale horizontal 0.5 + scale vertical 0.5 - origin);
-     }
-   in
-   Caml.print_endline
-     (if hit_sphere (0., 0., -1.) 1. rr then "true" else "false") *)
