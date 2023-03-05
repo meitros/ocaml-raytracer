@@ -15,13 +15,15 @@ module Ray = struct
   let at { start; direction } t = Vec3.(start + scale direction t)
 end
 
-let hit_sphere (center : point) (radius : float) (r : Ray.t) : bool =
+(* returns -1 if not, otherwise *)
+let hit_sphere (center : point) (radius : float) (r : Ray.t) : float =
   let oc = Vec3.(r.start - center) in
   let a = Vec3.dot r.direction r.direction in
   let b = 2.0 *. Vec3.dot oc r.direction in
   let c = Vec3.dot oc oc -. (radius *. radius) in
   let discriminant = (b *. b) -. (4. *. a *. c) in
-  Float.(discriminant > 0.)
+  if Float.(discriminant < 0.) then -1.
+  else (-.b -. Float.sqrt discriminant) /. (2. *. a)
 
 (* 
  * Create a vertical linear gradient background color
@@ -35,7 +37,12 @@ let bg_color (ray : Ray.t) =
     scale (Vec3.create 1. 1. 1.) (1. -. t) + scale (Vec3.create 0.5 0.7 1.0) t)
 
 let choose_color (ray : Ray.t) =
-  if hit_sphere (0., 0., -1.) 0.5 ray then (1.0, 0., 0.) else bg_color ray
+  let hit_sphere_as_float = hit_sphere (0., 0., -1.) 0.5 ray in
+
+  if Float.(hit_sphere_as_float < 0.) then bg_color ray
+  else
+    let n = Vec3.(unit (Ray.at ray hit_sphere_as_float) - create 0. 0. (-1.)) in
+    Vec3.scale (Vec3.add_scal n 1.) 0.5
 
 let write_image image filename =
   let out = Caml.open_out filename in
@@ -44,7 +51,7 @@ let write_image image filename =
 
 let () =
   let aspect_ratio = 16. /. 9. in
-  let image_width = 64 in
+  let image_width = 400 in
   let image_height =
     Int.of_float @@ (Float.of_int image_width /. aspect_ratio)
   in

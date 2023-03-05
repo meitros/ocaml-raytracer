@@ -4,6 +4,8 @@
  (preprocess
   (pps ppx_jane)))
 
+(ignored_subdirs (temp))
+
 (env
  (dev
   (flags

@@ -11,12 +11,24 @@ let vec_567 = Vec3.create 5. 6. 7.
 
 (* math *)
 let%expect_test "addition" =
+  print_vec @@ Vec3.add vec_123 vec_567;
   print_vec Vec3.(vec_123 + vec_567);
-  [%expect {| (6., 8., 10.) |}]
+  [%expect {|
+    (6., 8., 10.)
+    (6., 8., 10.) |}]
+
+let%expect_test "add scalar" =
+  print_vec @@ Vec3.add_scal vec_123 4.;
+  [%expect {| (5., 6., 7.) |}]
 
 let%expect_test "subtraction" =
+  print_vec @@ Vec3.sub vec_321 vec_567;
   print_vec Vec3.(vec_321 - vec_567);
-  [%expect {| (-2., -4., -6.) |}]
+  print_vec Vec3.(vec_567 - vec_321);
+  [%expect {|
+    (-2., -4., -6.)
+    (-2., -4., -6.)
+    (2., 4., 6.) |}]
 
 let%expect_test "negation" =
   print_vec @@ Vec3.neg vec_321;
