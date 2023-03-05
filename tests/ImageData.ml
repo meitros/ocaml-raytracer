@@ -2,16 +2,19 @@ open Raygun_lib
 open Stdio
 
 (*
-Tiny ppm tests. The ppm I'll generate (top-left green, top-right blue, 
-bottom-left grey, bottom-right white):
+Tiny ppm tests. The ppm I'll generate:
+  (top-left grey, 
+  top-right white, 
+  bottom-left green, 
+  bottom-right blue)
 
-P3
-2 2
-255
-0 255 0
-0 0 255
-127 127 127
-255 255 255
+  P3
+  2 2
+  255
+  127 127 127
+  255 255 255
+  0 255 0
+  0 0 255
 
 *)
 
@@ -28,10 +31,10 @@ let%expect_test "create" =
     P3
     2 2
     255
-    0 255 0
-    0 0 255
     127 127 127
-    255 255 255 |}]
+    255 255 255
+    0 255 0
+    0 0 255 |}]
 
 let%expect_test "set_pixel" =
   let image = ImageData.create 2 2 in
@@ -44,10 +47,10 @@ let%expect_test "set_pixel" =
     P3
     2 2
     255
-    0 255 0
-    0 0 255
     127 127 127
-    255 255 255 |}]
+    255 255 255
+    0 255 0
+    0 0 255 |}]
 
 let%expect_test "set" =
   let image = ImageData.create 2 2 in
@@ -56,11 +59,12 @@ let%expect_test "set" =
   ImageData.set_exn image 0 1 (0.5, 0.5, 0.5);
   ImageData.set_exn image 1 1 (1., 1., 1.);
   print_endline @@ ImageData.to_ppm image;
-  [%expect {|
+  [%expect
+    {|
     P3
     2 2
     255
-    0 255 0
-    0 0 255
     127 127 127
-    255 255 255 |}]
+    255 255 255
+    0 255 0
+    0 0 255 |}]

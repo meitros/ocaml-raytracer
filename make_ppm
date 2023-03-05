@@ -1,0 +1,1 @@
+dune exec ./raygun.exe; open test.ppm

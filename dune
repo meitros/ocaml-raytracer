@@ -7,6 +7,6 @@
 (env
  (dev
   (flags
-   (:standard -w -20 -w -27 -w -32 -w -34 -w -37 -w -39)))
+   (:standard -warn-error -A -w -20 -w -27 -w -32 -w -34 -w -37 -w -39)))
  (release
   (flags (:standard))))

@@ -1,6 +1,8 @@
 open! Core
 
-(* matrix of pixels (implemented using array) *)
+(* matrix of pixels (implemented using array). coordinate-system wise, 
+ * (0, 0) is the lower-left corner 
+ *)
 
 (* Represents a single pixel. Values are from 0 - 255 *)
 type pixel = int * int * int
@@ -17,20 +19,27 @@ let init width height ~f : t =
   {
     width;
     height;
-    data = Array.init (width * height) ~f:(fun i -> f (i % width) (i / height));
+    data =
+      Array.init (width * height) ~f:(fun i ->
+          f (i % width) (height - (i / width) - 1));
   }
+
+(* converts `(rf, gf, bf)` to `(r,g,b)` (floats from 0-1 to ints from 0-255) *)
+let color_to_pixel (rf, gf, bf) =
+  Int.(of_float (255. *. rf), of_float (255. *. gf), of_float (255. *. bf))
 
 (* sets a pixel in the image. Each pixel color should be between 0-255 *)
 let set_pixel_exn (image : t) x y (color : pixel) =
-  if x >= image.width then raise_s [%message "out of bounds x"];
-  if y >= image.height then raise_s [%message "out of bounds y"];
-  image.data.((image.width * y) + x) <- color
+  if x < 0 || x >= image.width then raise_s [%message "out of bounds x"];
+  if y < 0 || y >= image.height then raise_s [%message "out of bounds y"];
+  (* (0, 0) is lower left so we need to flip y *)
+  let y' = image.height - 1 - y in
+  image.data.((image.width * y') + x) <- color
 
 (* sets the color of the `(x, y)` pixel. `(rf, gf, bf)` are rgb components
    that range from 0-1 *)
 let set_exn (image : t) x y (rf, gf, bf) =
-  set_pixel_exn image x y
-    Int.(of_float (255. *. rf), of_float (255. *. gf), of_float (255. *. bf))
+  set_pixel_exn image x y (color_to_pixel (rf, gf, bf))
 
 (* Converts an ImageData to a .ppm file. This uses the P3 format,
    which is entirely in ascii and easy to read.
