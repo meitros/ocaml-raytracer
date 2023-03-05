@@ -1,6 +1,6 @@
-(executable
- (name raygun)
- (libraries core raygun_lib)
+(library
+ (name raygun_lib)
+ (libraries core)
  (preprocess
   (pps ppx_jane)))
 

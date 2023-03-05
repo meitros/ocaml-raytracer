@@ -1,6 +1,7 @@
-(executable
- (name raygun)
+(library
+ (name raygun_tests)
  (libraries core raygun_lib)
+ (inline_tests)
  (preprocess
   (pps ppx_jane)))
 
