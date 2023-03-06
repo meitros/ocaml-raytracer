@@ -4,7 +4,7 @@ open! Core
  * (0, 0) is the lower-left corner 
  *)
 
-(* Represents a single pixel. Values are from 0 - 255 *)
+(* Represents a single pixel. Has RGB values from 0 - 255 *)
 type pixel = int * int * int
 
 (* the pixel data, width, and height *)

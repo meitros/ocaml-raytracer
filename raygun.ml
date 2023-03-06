@@ -40,7 +40,7 @@ let four_spheres_definition =
       (* ground *)
       Sphere.create (0., -100.5, -1.) 100. (Diffuse (0.8, 0.8, 0.));
       (* center *)
-      Sphere.create (0., 0., -1.) 0.5 (Diffuse (0.7, 0.3, 0.3));
+      Sphere.create (0., 0., -1.) 0.5 (Diffuse (0.1, 0.2, 0.5));
       (* left *)
       Sphere.create (-1., 0., -1.) 0.5
         (Metal { color = (0.8, 0.8, 0.8); fuzziness = 0.3 });
