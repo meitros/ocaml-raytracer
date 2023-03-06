@@ -44,7 +44,9 @@ let hit ({ center; radius } : t) ?min_t ?max_t (ray : Ray.t) :
         {
           point;
           normal =
-            (if is_front_face then outward_normal else Vec3.neg outward_normal);
+            Vec3.unit
+              (if is_front_face then outward_normal
+              else Vec3.neg outward_normal);
           is_front_face;
           t = root;
         }

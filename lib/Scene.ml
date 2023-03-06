@@ -11,7 +11,7 @@ let create ~aspect_ratio ~scene_definition ~camera =
 
 let get_nearest_hit scene (ray : Ray.t) =
   List.fold scene.scene_definition ~init:None ~f:(fun curr shape ->
-      match Shape.hit shape ~min_t:0. ray with
+      match Shape.hit shape ~min_t:0.00001 ray with
       | Miss -> curr
       | Hit hit_details -> (
           match curr with
@@ -21,13 +21,27 @@ let get_nearest_hit scene (ray : Ray.t) =
                 Some (shape, hit_details)
               else Some (last_shape, last_hit)))
 
-let color_of_ray scene (ray : Ray.t) =
-  match get_nearest_hit scene ray with
-  | None -> Utils.bg_color ray
-  | Some (shape, { normal; t; _ }) ->
-      Vec3.scale Vec3.(normal + Vec3.create 1. 1. 1.) 0.5
+let rec color_of_ray scene (ray : Ray.t) depth =
+  if depth <= 0 then (0., 0., 0.)
+  else
+    match get_nearest_hit scene ray with
+    | None -> Utils.bg_color ray
+    | Some (shape, { point; normal; t; _ }) ->
+        let target =
+          Vec3.(
+            point + normal
+            (* TODO: try out hemispherical refraction? *)
+            + (Vec3.unit @@ MathUtils.random_point_in_unit_sphere ()))
+        in
+        Vec3.scale
+          (color_of_ray scene
+             (Ray.create point Vec3.(target - point))
+             (depth - 1))
+          0.5
+(* point3 target = rec.p + rec.normal + random_in_unit_sphere();
+   return 0.5 * ray_color(ray(rec.p, target - rec.p), world); *)
 
-let render ?(samples_per_pixel = 75) (scene : t) ~image_width =
+let render ?(samples_per_pixel = 25) (scene : t) ~image_width =
   let camera = scene.camera in
   let image_height =
     Int.of_float @@ (Float.of_int image_width /. scene.aspect_ratio)
@@ -61,7 +75,7 @@ let render ?(samples_per_pixel = 75) (scene : t) ~image_width =
             + scale camera.vertical v - camera.origin);
       }
     in
-    color_of_ray scene r
+    color_of_ray scene r 50
   in
   let render_pixel x y =
     let samples =
@@ -72,6 +86,6 @@ let render ?(samples_per_pixel = 75) (scene : t) ~image_width =
         (List.reduce_exn samples ~f:Vec3.add)
         (Float.of_int samples_per_pixel)
     in
-    ImageData.color_to_pixel averaged
+    ImageData.color_to_pixel @@ Vec3.sqrt_exn averaged
   in
   ImageData.init image_width image_height ~f:render_pixel
