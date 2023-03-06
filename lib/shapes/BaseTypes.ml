@@ -2,9 +2,11 @@ open! Base
 
 (* Math *)
 type point = Vec3.t
+type color = Vec3.t
 
-(* Return values when we test whether a ray hit an object *)
+(* Intersections types *)
 
+(* The details of a ray hitting an object *)
 type shape_hit_details = {
   point : Vec3.t;
   (* 
@@ -18,3 +20,9 @@ type shape_hit_details = {
 }
 
 type shape_hit = Hit of shape_hit_details | Miss
+
+(* Materials Types *)
+
+type material =
+  | Diffuse of color
+  | Metal of { color : color; fuzziness : float }

@@ -77,3 +77,13 @@ let%expect_test "unit" =
     1.
     1.
     1. |}]
+
+let%expect_test "reflect" =
+  (* 45 degrees *)
+  print_vec @@ Vec3.reflect (1., -1., 0.) (0., 1., 0.);
+  (* the second parameter is basically zero (< Float.epsilon_float) *)
+  print_vec
+  @@ Vec3.reflect (0., -1., 0.) Float.(sqrt 2. /. 2., sqrt 2. /. 2., 0.);
+  [%expect {|
+    (1., 1., 0.)
+    (1., 2.22044604925e-16, 0.) |}]

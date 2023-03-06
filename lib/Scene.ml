@@ -21,25 +21,19 @@ let get_nearest_hit scene (ray : Ray.t) =
                 Some (shape, hit_details)
               else Some (last_shape, last_hit)))
 
+(* Casts a ray in `scene`, returning the color. Recursive, since the ray might
+   reflect/refract from what it hits. *)
 let rec color_of_ray scene (ray : Ray.t) depth =
   if depth <= 0 then (0., 0., 0.)
   else
     match get_nearest_hit scene ray with
     | None -> Utils.bg_color ray
-    | Some (shape, { point; normal; t; _ }) ->
-        let target =
-          Vec3.(
-            point + normal
-            (* TODO: try out hemispherical refraction? *)
-            + (Vec3.unit @@ MathUtils.random_point_in_unit_sphere ()))
-        in
-        Vec3.scale
-          (color_of_ray scene
-             (Ray.create point Vec3.(target - point))
-             (depth - 1))
-          0.5
-(* point3 target = rec.p + rec.normal + random_in_unit_sphere();
-   return 0.5 * ray_color(ray(rec.p, target - rec.p), world); *)
+    | Some (shape, hit_details) -> (
+        match Materials.scatter ray hit_details (Shape.material shape) with
+        | Absorb -> (0., 0., 0.)
+        | Scatter (scatter_ray, color) ->
+            Vec3.pairwise_mult color
+              (color_of_ray scene scatter_ray (depth - 1)))
 
 let render ?(samples_per_pixel = 25) (scene : t) ~image_width =
   let camera = scene.camera in

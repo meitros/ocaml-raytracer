@@ -1,11 +1,11 @@
 open! Base
 open BaseTypes
 
-type t = { center : point; radius : float }
+type t = { center : point; radius : float; material : material }
 
-let create center radius : t = { center; radius }
+let create center radius material : t = { center; radius; material }
 
-let hit ({ center; radius } : t) ?min_t ?max_t (ray : Ray.t) :
+let hit ({ center; radius; _ } : t) ?min_t ?max_t (ray : Ray.t) :
     BaseTypes.shape_hit =
   let filter_roots_by_args (roots : float list) =
     (* given a list of roots, make sure they're within the min/max range above *)

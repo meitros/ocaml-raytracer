@@ -59,6 +59,11 @@ let near_zero (x, y, z) =
   && Float.(abs y < nz_epsilon)
   && Float.(abs z < nz_epsilon)
 
+(* Given a vector, returns the reflection of that vector against a surface
+   with the provided normal *)
+let reflect (vector : t) (normal : t) : t =
+  sub vector (scale normal (2. *. dot vector normal))
+
 (* converts a vector into a string *)
 let to_s (a, b, c) = Printf.sprintf "(%F, %F, %F)" a b c
 
