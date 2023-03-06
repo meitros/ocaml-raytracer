@@ -1,3 +1,5 @@
+open! Core
+
 type t = Sphere of Sphere.t
 
 let hit shape ?min_t ?max_t ray =
