@@ -1,9 +1,11 @@
 open! Base
 
+(* Math *)
 type point = Vec3.t
 
-(* Return value when we test whether a ray hit an object *)
-type object_hit_details = {
+(* Return values when we test whether a ray hit an object *)
+
+type shape_hit_details = {
   point : Vec3.t;
   (* 
    * we have the normal always oppose the ray, e.g it points out when 
@@ -15,4 +17,4 @@ type object_hit_details = {
   t : float;
 }
 
-type object_hit = Hit of object_hit_details | Miss
+type shape_hit = Hit of shape_hit_details | Miss

@@ -5,7 +5,8 @@ type t = { center : point; radius : float }
 
 let create center radius : t = { center; radius }
 
-let hit ({ center; radius } : t) ?min_t ?max_t (ray : Ray.t) : object_hit =
+let hit ({ center; radius } : t) ?min_t ?max_t (ray : Ray.t) :
+    BaseTypes.shape_hit =
   let filter_roots_by_args (roots : float list) =
     (* given a list of roots, make sure they're within the min/max range above *)
     roots

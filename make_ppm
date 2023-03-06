@@ -1,1 +1,6 @@
-dune exec ./raygun.exe; open test.ppm
+rm test.ppm
+dune exec ./raygun.exe
+if [ $? -eq 0 ] 
+then
+    open test.ppm
+fi
